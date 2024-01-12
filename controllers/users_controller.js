@@ -1,10 +1,27 @@
 const User=require('../models/user');
 
-module.exports.profile=function(req,res){
-    return res.render('user_profile',{
-        title: "Codeial|Profile"
-    });
+
+    module.exports.profile=function(req,res){
+    if(req.cookies.user_id){
+        User.findById(req.cookies.user_id)
+        .then(user => {
+            if (user) {
+                return res.render('user_profile', {
+                    title: "User Profile",
+                    user: user
+                });
+            }
+
+            return res.redirect('/users/sign-in');
+        })
+        .catch(err => {
+            console.log('Error in fetching user profile:', err);
+            return res.redirect('/error-page');
+        });
+} else {
+    return res.redirect('/users/sign-in');
 }
+};
 
 
 //render sign up page
@@ -45,27 +62,36 @@ module.exports.create=function(req,res){
         console.log('Error in signing up:', err);
         return res.redirect('back');
     });
-    //     if(err){
-    //         console.log('Error in finding user in signing up'); return
-    //     }
-
-    //     if(!user){
-    //        User.create(req.body,function(err,user){
-    //         if(err){
-    //             console.log('Error in creating user while signing up'); return
-    //         }
-
-    //         return res.redirect('/users/sign-in');
-    //        })}
-    //        else{
-    //           return res.redirect('back');
-    //        }
-        
-    // });
-
+   
 }
 
 //signin the user and create session
 module.exports.createSession=function(req,res){
-    //to do later
+    //find the user
+   User.findOne({email:req.body.email})
+      .then(user=>{
+        //handle user found
+        if(!user)
+        return res.redirect('back');
+      
+     
+    
+    
+       //handle mismatching of passwords
+       if(user.password!==req.body.password){
+        return res.redirect('back');
+       }
+
+      //handle sesssion creation 
+       res.cookie('user_id',user.id)
+       return res.redirect('/users/profile');
+    })
+    .catch(err=>{
+        console.log('Error in signing in',err);
+        return res.redirect('back');
+    });
+   
 }
+      
+
+    
