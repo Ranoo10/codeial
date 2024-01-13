@@ -8,6 +8,7 @@ const db=require('./config/mongoose');
 const session=require('express-session');
 const passport=require('passport');
 const passportLocal=require('./config/passport-local-stratergy');
+const MongoStore=require('connect-mongo');
 
 app.use(express.urlencoded());
 
@@ -20,16 +21,12 @@ app.use(expressLayouts);
 app.set('layout extractStyles',true);
 app.set('layout extractScripts',true);
 
-
-
-
-
-
-
 //set up a view engine
 app.set('view engine','ejs');
 app.set('views','./views');
 
+
+//mongo store is used to store the session cookiein the db
 app.use(session({
     name:'codeial',
     //TODO change the secret before deployment in production mode
@@ -38,7 +35,14 @@ app.use(session({
     resave:false,
     cookie:{
         maxAge: (1000*60*100)
-    }
+    },
+    store:MongoStore.create({
+
+            mongoUrl:'mongodb://localhost/codeial_development',
+            autoRemove:'disabled',
+        
+    })
+    
 }));
 
 app.use(passport.initialize());
