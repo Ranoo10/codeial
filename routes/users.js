@@ -12,14 +12,6 @@ router.get('/sign-up',userController.signUp);
 router.get('/sign-in',userController.signIn);
 
 router.post('/create',userController.create);
-//creating session using manual authentication
-// router.post('/create-session',userController.createSession);
-// router.post('/sign-out',function(req,res){
-//     res.clearCookie('user_id');
-
-//     return res.redirect('/users/sign-in');
-// });
-
 //creating session using passport
 //use passport as a middleware to create session
 router.post('/create-session',passport.authenticate(

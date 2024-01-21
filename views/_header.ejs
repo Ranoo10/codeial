@@ -1,5 +1,14 @@
-<header>
-    Page Header
+<header id="layout-header">
+   <nav>
+    <div class="mini-logo">
+      <p>
+        <a href="/">
+          codeial
+        </a>
+      </p>
+    </div>
+  
+    <div class="auth-links">
     <ul>
         <% if (locals.user){ %>
           <li>
@@ -22,4 +31,6 @@
         
         <% } %>
     </ul>
+  </div>
+  </nav>
 </header>
