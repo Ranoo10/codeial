@@ -18,7 +18,15 @@ module.exports.home=function(req,res){
       //   return res.redirect('back');
       // });
       //populate the user of each post 
-      Post.find({}).populate('user').exec()
+      Post.find({})
+      .populate('user')
+      .populate({
+        path:'comments',
+        populate:{
+            path:'user',
+        }
+      })
+      .exec()
       .then(posts => {
         console.log(req.cookies);
         return res.render('home', {
