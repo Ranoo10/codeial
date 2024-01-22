@@ -1,5 +1,5 @@
 
-    <h1>Codeial / <%= title %></h1>
+    <h1><%= title %></h1>
 
     <section id="feed-posts">
         <h4>Posts</h4>
@@ -7,6 +7,27 @@
             <textarea name="content" cols="30" ros="3" placeholder="Type area..."></textarea>
             <input type="Submit" value="Post">
         </form>
-        
+        <div id="posts-list-container">
+            <ul>
+                <% for(post of posts) { %>
+                     <li>
+                        <p>
+                            <%= post.content %>
+                            <br>
+                            <small>
+                                <!-- <% if(post.user) { %> -->
+                                Posted by:<%= post.user.name %>
+                                <!-- <% } else { %>
+                                User not available
+                            <% } %> -->
+                                
+                            </small>
+                        </p>
+                        
+                     </li>
+                    
+                    <% } %>
+            </ul>
+        </div>
     </section>
 
