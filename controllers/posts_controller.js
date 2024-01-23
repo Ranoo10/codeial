@@ -16,11 +16,11 @@ module.exports.create=function(req,res){
         user: req.user._id,
     })
     .then(post=>{
-        console.log('Post created',post);
+        req.flash('success','Post published!');
         return res.redirect('back');
     })
     .catch(err=>{
-        console.log('Error in creating post',err);
+        req.flash('error',err);
         return res.redirect('back');
     });
   
@@ -35,7 +35,9 @@ module.exports.destroy=function(req,res){
             return Comment.deleteMany({ post: req.params.id })
                 .then(() => {
                     // Delete the post
+                    req.flash('success','Post and comments deleted!');
                     return post.deleteOne();
+                    
                 })
                 .then(() => {
                     res.redirect('back');
@@ -46,11 +48,12 @@ module.exports.destroy=function(req,res){
                 });
         } else {
             // Post not found or user is not the owner
+            req.flash('error','You cannot delete this post');
             return res.redirect('back');
         }
     })
     .catch(err => {
-        console.error('Error finding post:', err);
+        req.flash('error',err);
         res.redirect('back');
     });
 };
