@@ -15,17 +15,27 @@ module.exports.create=function(req,res){
         content: req.body.content,
         user: req.user._id,
     })
+  
+    
     .then(post=>{
         req.flash('success','Post published!');
+        if(req.xhr){
+            return res.status(200).json({
+                data:{
+                    post:post
+                },
+                message:"post created",
+            })
+        }
         return res.redirect('back');
     })
     .catch(err=>{
         req.flash('error',err);
         return res.redirect('back');
     });
-  
-
+   
 }
+
 
 module.exports.destroy=function(req,res){
     Post.findById(req.params.id)
@@ -37,7 +47,14 @@ module.exports.destroy=function(req,res){
                     // Delete the post
                     req.flash('success','Post and comments deleted!');
                     return post.deleteOne();
-                    
+                    if(req.xhr){
+                      return res.status(200).json({
+                        data:{
+                            post_id:req.params.id,
+                        },
+                        message:"Post deleted",
+                      })
+                    }                  
                 })
                 .then(() => {
                     res.redirect('back');
