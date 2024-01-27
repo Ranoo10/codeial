@@ -1,69 +1,78 @@
 const Comment=require('../models/comment');
 const Post=require('../models/post')
 
-module.exports.create=function(req,res){
-    let foundPost;
-   Post.findById(req.body.post)
-    .then(post=>{
-        if(!post){
-            console.error('Post not found');
+module.exports.create= async function(req,res){
+    try{
+        let post = await Post.findById(req.body.post);
+        if(post){
+            let comment = await Comment.create({
+                content: req.body.content,
+                post: req.body.post,
+                user: req.user._id,
+            });
+
+            post.comments.push(comment);
+            post.save();
+
+            if(req.xhr){
+                //to fetch user id
+                //comment = await comment.populate('user','name').execPopulate();
+    
+                return res.status(200).json({
+                    data:{
+                        comment: comment
+                    },
+                    messsage:'Post created!',
+                });
+           }
+
+           req.flash('success','Comment Published');
+
+           res.redirect('/');
+        }
+    }catch(err){
+        console.log(err);
+        req.flash('error',err);
+        return;
+    };
+}
+    
+   
+   
+
+module.exports.destroy = async function(req,res){
+    try{
+        let comment = await Comment.findById(req.params.id);
+
+        if(!comment){
+            return res.status(404).json({ error: "Comment not found"});
+        }
+        if(comment.user.toString()!==req.user.id.toString()){
+            return res.status(403).json({ error: "Unauthorized"});
+        }
+
+        const postId = comment.post;
+
+        
+        await comment.deleteOne();
+
+        await Post.findByIdAndUpdate(postId,{ $pull: { comments: req.params.id } });
+            if(req.xhr){
+                return res.status(200).json({
+                    data:{
+                        comment_id: req.params.id
+                    },
+                    messsage: "Comment Deleted"
+                });
+            }
+            req.flash('success','Comment deleted');
             return res.redirect('back');
         }
-
-        foundPost=post;
-        return Comment.create({
-            content:req.body.content,
-            post: req.body.post,
-            user: req.user._id,
-        });
-    })
-    .then(comment=>{
-        foundPost.comments.push(comment);
-        return foundPost.save();
-    })
-    .then(()=>{
-        res.redirect('/');
-    })  
-    .catch(err=>{
-        console.error('Error',err);
-        res.redirect('back');
-    });
-        
+        catch(err){
+        req.flash('error','Internal Server error');
+        return res.status(500).json({ error: "Internal Server error"});
+    }
 }
 
-module.exports.destroy=function(req,res){
-    console.log('Commend id',req.params.id);
-    Comment.findById(req.params.id)
     
-    .then(comment=>{
-        
-        if(!comment){
-            console.log('Comment not found');
-             return res.redirect('back');
-        }
-    
-        if(comment.user!=req.user.id){
-            console.log('User is not the owner of comment');
-            return res.redirect('back')
-        }
-            let postId=comment.post;
-
-              comment.deleteOne()
-              .then(()=>{
-                console.log('Comment deleted successfully');
-                return Post.findByIdAndUpdate(postId,{$pull: {comments: req.params.id}});
-              })
-              .then(()=>{
-                console.log('Post updated successfully');
-                 res.redirect('back');
-              })
-              .catch(err=>{
-                console.error('Error in deleting comment',err);
-                res.redirect('back');
-              });
-            })
-            .catch(err=>{
-                console.error('Error in finding comment',err);
-                 res.redirect('back');
-            });
-        }
+   
